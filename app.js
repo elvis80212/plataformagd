@@ -1,5 +1,7 @@
 // ===== DATA =====
 const libros = [
+  { id: 100, titulo: "Aprende Hipnosis en 13 Lecciones", autor: "William W. Hewitt", precio: 0, estrellas: 5, categoria: "Psicología", cover: "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=300&q=80", descripcion: "Aprende a hipnotizar, autohipnotizarte y realizar regresiones en el tiempo. Incluye técnicas para dejar de fumar, adelgazar y superar miedos. Una guía completa para principiantes y avanzados.", bestseller: true, pdf: "Aprende-hipnosis-en-13-lecciones.pdf" },
+  { id: 101, titulo: "La Liberación del Alma", autor: "Michael A. Singer", precio: 0, estrellas: 5, categoria: "Espiritualidad", cover: "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=300&q=80", descripcion: "Una exploración profunda del camino hacia la libertad interior y la liberación espiritual. Singer nos guía a través de la filosofía Advaita para soltar el ego y descubrir la conciencia pura que somos.", bestseller: true, pdf: "La_liberación_del_alma__Michael_A__Si_____Z-Library_.pdf" },
   { id: 1,  titulo: "El Arte de Vivir en Paz",      autor: "E. Tolle",     precio: 24.50, estrellas: 5, categoria: "Meditación",    cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&q=80",    descripcion: "Una guía profunda para encontrar la paz interior en medio del caos cotidiano. E. Tolle nos lleva a través de prácticas milenarias adaptadas al mundo moderno, ayudándonos a soltar el ego y abrazar el momento presente con total plenitud y conciencia.", bestseller: true },
   { id: 4,  titulo: "El Poder del Ahora",           autor: "E. Tolle",     precio: 21.90, estrellas: 5, categoria: "Meditación",    cover: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&q=80",    descripcion: "El libro que ha transformado millones de vidas en todo el mundo. Eckhart Tolle explica cómo liberarse del dolor emocional y la ansiedad viviendo plenamente en el momento presente, el único momento que realmente existe.", bestseller: true },
   { id: 5,  titulo: "Meditación Profunda",          autor: "A. Sharma",    precio: 18.50, estrellas: 4, categoria: "Meditación",    cover: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80",    descripcion: "Técnicas probadas de meditación para reducir el estrés, mejorar la concentración y cultivar una mente más serena y equilibrada. Incluye ejercicios prácticos para principiantes y meditadores avanzados.", bestseller: false },
@@ -62,7 +64,7 @@ function renderBooks(lista) {
         <div class="book-price">€${libro.precio.toFixed(2)}</div>
       </div>
       <div class="book-actions">
-        <button class="btn-carrito" onclick="addToCart(${libro.id})">AÑADIR AL CARRITO</button>
+        ${libro.pdf ? '<a class="btn-carrito" href="' + libro.pdf + '" target="_blank" style="text-align:center;text-decoration:none;display:block">📖 LEER PDF GRATIS</a>' : '<button class="btn-carrito" onclick="addToCart(' + libro.id + ')">AÑADIR AL CARRITO</button>'}
         <button class="btn-saber" onclick="verLibro(${libro.id})">SABER MÁS</button>
       </div>
     `;
