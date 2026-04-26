@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Sabiduría</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f0e0c;
+      --surface: #1a1814;
+      --border: #2e2b26;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --text: #f0ebe2;
+      --text-muted: #8a8070;
+      --red: #e05c5c;
+      --green: #5cb88a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 60% 40%, #2a2010 0%, #0f0e0c 70%);
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .login-card .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .login-card .subtitle {
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+    label {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-align: left;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: #13120f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 18px;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--gold);
+    }
+    textarea { resize: vertical; min-height: 100px; }
+    .btn-gold {
+      width: 100%;
+      background: var(--gold);
+      color: #0f0e0c;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-gold:hover { background: var(--gold-light); }
+    .btn-gold:active { transform: scale(0.98); }
+    .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+    #login-error {
+      color: var(--red);
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* ── ADMIN PANEL ── */
+    #admin-panel { display: none; }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .topbar-logo {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+      font-size: 1.2rem;
+    }
+    .topbar-logo span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-left: 10px;
+    }
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    .panel-body {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    @media(max-width:700px) { .panel-body { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+    }
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--gold);
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--gold); background: #1e1c17; }
+    .upload-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; margin: 0;
+    }
+    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .upload-zone p { font-size: 0.85rem; color: var(--text-muted); }
+    .upload-zone .file-name { color: var(--gold); font-size: 0.9rem; margin-top: 6px; }
+
+    .stars-input { display: flex; gap: 6px; margin-bottom: 18px; }
+    .star-btn {
+      background: none; border: none; font-size: 1.4rem; cursor: pointer;
+      color: var(--border); transition: color 0.15s;
+    }
+    .star-btn.active { color: var(--gold); }
+
+    .price-row { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+    .price-row input { margin-bottom: 0; flex: 1; }
+    .free-toggle {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.85rem; color: var(--text-muted);
+      white-space: nowrap; cursor: pointer;
+    }
+    .free-toggle input[type=checkbox] {
+      width: 16px; height: 16px; margin: 0; accent-color: var(--gold);
+    }
+
+    #form-msg {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 14px;
+      display: none;
+    }
+    #form-msg.ok { background: #1a3028; color: var(--green); border: 1px solid #2a5040; }
+    #form-msg.err { background: #2e1515; color: var(--red); border: 1px solid #4a2020; }
+
+    /* Books list */
+    .books-list { display: flex; flex-direction: column; gap: 12px; }
+    .book-item {
+      background: #13120f;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .book-item img {
+      width: 44px; height: 60px; object-fit: cover; border-radius: 5px; flex-shrink: 0;
+    }
+    .book-item-info { flex: 1; min-width: 0; }
+    .book-item-title { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .book-item-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+    .btn-delete {
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text-muted); font-size: 0.75rem; padding: 4px 10px;
+      cursor: pointer; flex-shrink: 0; transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-delete:hover { border-color: var(--red); color: var(--red); }
+    .empty-msg { color: var(--text-muted); font-size: 0.88rem; text-align: center; padding: 30px 0; }
+
+    /* Config card full width */
+    .config-card { grid-column: 1 / -1; }
+    .config-row {
+      display: flex; gap: 12px; align-items: center;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .config-row:last-child { border-bottom: none; }
+    .config-label { flex: 1; color: var(--text-muted); }
+    .config-value {
+      flex: 2; color: var(--text);
+      background: #13120f; border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 12px; font-size: 0.88rem;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .config-save {
+      background: none; border: 1px solid var(--gold); border-radius: 6px;
+      color: var(--gold); font-size: 0.8rem; padding: 6px 14px; cursor: pointer;
+      transition: background 0.2s, color 0.2s; white-space: nowrap;
+    }
+    .config-save:hover { background: var(--gold); color: #0f0e0c; }
+
+    /* Supabase setup banner */
+    #setup-banner {
+      background: #1e1a0e;
+      border: 1px solid #3a2e10;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      font-size: 0.85rem;
+      color: #c4a84a;
+      line-height: 1.6;
+    }
+    #setup-banner strong { color: var(--gold-light); }
+    #setup-banner code {
+      background: #13120f; border-radius: 4px; padding: 2px 6px;
+      font-size: 0.82rem; color: #e8c97a;
+    }
+    #setup-banner ol { padding-left: 18px; margin-top: 8px; }
+    #setup-banner li { margin-bottom: 4px; }
+    #setup-banner a { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo">🌿 Sabiduría</div>
+    <div class="subtitle">Panel de Administrador</div>
+
+    <label>Correo</label>
+    <input type="email" id="login-email" placeholder="admin@correo.com" />
+
+    <label>Contraseña</label>
+    <input type="password" id="login-pass" placeholder="••••••••" />
+
+    <div id="login-error">Correo o contraseña incorrectos.</div>
+    <button class="btn-gold" onclick="loginAdmin()">ENTRAR</button>
+  </div>
+</div>
+
+<!-- ══════════════ ADMIN ══════════════ -->
+<div id="admin-panel">
+  <div class="topbar">
+    <div class="topbar-logo">🌿 Sabiduría <span>Admin</span></div>
+    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <div class="panel-body">
+
+    <!-- SETUP BANNER (se oculta cuando Supabase está configurado) -->
+    <div id="setup-banner" style="grid-column:1/-1">
+      <strong>⚙️ Configura Supabase (solo una vez)</strong><br>
+      Sigue estos pasos para conectar tu base de datos gratuita:
+      <ol>
+        <li>Ve a <a href="https://supabase.com" target="_blank">supabase.com</a> → crea una cuenta gratis</li>
+        <li>Crea un proyecto nuevo (elige la región más cercana)</li>
+        <li>Ve a <strong>SQL Editor</strong> y ejecuta el script de abajo para crear la tabla</li>
+        <li>Ve a <strong>Project Settings → API</strong> y copia tu <strong>URL</strong> y <strong>anon key</strong></li>
+        <li>Pégalos en el formulario de configuración abajo ↓</li>
+      </ol>
+      <br>
+      <strong>Script SQL (pega esto en Supabase → SQL Editor):</strong><br>
+      <code>
+        CREATE TABLE libros (<br>
+        &nbsp; id BIGSERIAL PRIMARY KEY,<br>
+        &nbsp; titulo TEXT NOT NULL,<br>
+        &nbsp; autor TEXT,<br>
+        &nbsp; precio NUMERIC DEFAULT 0,<br>
+        &nbsp; estrellas INT DEFAULT 5,<br>
+        &nbsp; categoria TEXT,<br>
+        &nbsp; cover TEXT,<br>
+        &nbsp; descripcion TEXT,<br>
+        &nbsp; pdf_url TEXT,<br>
+        &nbsp; bestseller BOOLEAN DEFAULT false,<br>
+        &nbsp; created_at TIMESTAMPTZ DEFAULT NOW()<br>
+        );
+      </code>
+    </div>
+
+    <!-- FORMULARIO AGREGAR LIBRO -->
+    <div class="card">
+      <div class="card-title">➕ Agregar Libro</div>
+
+      <div id="form-msg"></div>
+
+      <label>Título del libro *</label>
+      <input type="text" id="f-titulo" placeholder="Ej: El Poder del Ahora" />
+
+      <label>Autor *</label>
+      <input type="text" id="f-autor" placeholder="Ej: Eckhart Tolle" />
+
+      <label>Categoría</label>
+      <select id="f-categoria">
+        <option value="Filosofía">Filosofía</option>
+        <option value="Espiritualidad">Espiritualidad</option>
+        <option value="Meditación">Meditación</option>
+        <option value="Mindfulness">Mindfulness</option>
+        <option value="Superación">Superación</option>
+        <option value="Psicología">Psicología</option>
+        <option value="Biografías">Biografías</option>
+      </select>
+
+      <label>Estrellas</label>
+      <div class="stars-input" id="stars-input">
+        <button class="star-btn active" data-v="1" onclick="setStar(1)">★</button>
+        <button class="star-btn active" data-v="2" onclick="setStar(2)">★</button>
+        <button class="star-btn active" data-v="3" onclick="setStar(3)">★</button>
+        <button class="star-btn active" data-v="4" onclick="setStar(4)">★</button>
+        <button class="star-btn active" data-v="5" onclick="setStar(5)">★</button>
+      </div>
+
+      <label>Precio</label>
+      <div class="price-row">
+        <input type="number" id="f-precio" placeholder="0.00" min="0" step="0.01" />
+        <label class="free-toggle">
+          <input type="checkbox" id="f-gratis" onchange="toggleGratis()" /> Gratis
+        </label>
+      </div>
+
+      <label>URL de la portada (imagen)</label>
+      <input type="url" id="f-cover" placeholder="https://images.unsplash.com/..." />
+
+      <label>URL del PDF (opcional)</label>
+      <input type="url" id="f-pdf" placeholder="https://... o ruta relativa" />
+
+      <label>Descripción</label>
+      <textarea id="f-desc" placeholder="Resumen del libro..."></textarea>
+
+      <label class="free-toggle" style="margin-bottom:18px;display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="f-bestseller" /> Marcar como Bestseller
+      </label>
+
+      <button class="btn-gold" id="btn-guardar" onclick="guardarLibro()">GUARDAR LIBRO</button>
+    </div>
+
+    <!-- LISTA DE LIBROS -->
+    <div class="card">
+      <div class="card-title">📚 Libros publicados <span id="books-count" style="font-family:'DM Sans';font-size:0.8rem;color:var(--text-muted)"></span></div>
+      <div class="books-list" id="books-list">
+        <div class="empty-msg">Cargando libros...</div>
+      </div>
+    </div>
+
+    <!-- CONFIGURACIÓN SUPABASE -->
+    <div class="card config-card">
+      <div class="card-title">🔑 Configuración de Supabase</div>
+
+      <div class="config-row">
+        <div class="config-label">URL del proyecto</div>
+        <input class="config-value" type="text" id="cfg-url" placeholder="https://xxxx.supabase.co" />
+        <button class="config-save" onclick="saveConfig()">Guardar</button>
+      </div>
+      <div class="config-row">
+        <div class="config-label">Anon Key</div>
+        <input class="config-value" type="text" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsIn..." />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════
+//  CONFIG SUPABASE
+// ══════════════════════════════
+let SUPABASE_URL = localStorage.getItem('sb_url') || '';
+let SUPABASE_KEY = localStorage.getItem('sb_key') || '';
+
+function saveConfig() {
+  SUPABASE_URL = document.getElementById('cfg-url').value.trim().replace(/\/$/, '');
+  SUPABASE_KEY = document.getElementById('cfg-key').value.trim();
+  localStorage.setItem('sb_url', SUPABASE_URL);
+  localStorage.setItem('sb_key', SUPABASE_KEY);
+  document.getElementById('setup-banner').style.display = 'none';
+  alert('✅ Configuración guardada. Ahora puedes agregar libros.');
+  loadBooks();
+}
+
+function supabaseHeaders() {
+  return {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+}
+
+// Cargar config guardada
+window.addEventListener('DOMContentLoaded', () => {
+  if (SUPABASE_URL) {
+    document.getElementById('cfg-url').value = SUPABASE_URL;
+    document.getElementById('setup-banner').style.display = 'none';
+  }
+  if (SUPABASE_KEY) {
+    document.getElementById('cfg-key').value = SUPABASE_KEY;
+  }
+});
+
+// ══════════════════════════════
+//  LOGIN (simple, sin backend)
+// ══════════════════════════════
+const ADMIN_EMAIL = 'admin@sabiduria.com'; // ← cambia este correo
+const ADMIN_PASS  = 'sabiduria2024';        // ← cambia esta contraseña
+
+function loginAdmin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+
+  if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+    sessionStorage.setItem('admin_ok', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    loadBooks();
+    errEl.style.display = 'none';
+  } else {
+    errEl.style.display = 'block';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('admin_ok');
+  location.reload();
+}
+
+// Auto-login si ya estaba autenticado
+if (sessionStorage.getItem('admin_ok') === '1') {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+}
+
+// Login con Enter
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') {
+    loginAdmin();
+  }
+});
+
+// ══════════════════════════════
+//  ESTRELLAS
+// ══════════════════════════════
+let starValue = 5;
+function setStar(v) {
+  starValue = v;
+  document.querySelectorAll('.star-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.v) <= v);
+  });
+}
+
+// ══════════════════════════════
+//  GRATIS TOGGLE
+// ══════════════════════════════
+function toggleGratis() {
+  const gratis = document.getElementById('f-gratis').checked;
+  const precioInput = document.getElementById('f-precio');
+  precioInput.disabled = gratis;
+  if (gratis) precioInput.value = '0';
+}
+
+// ══════════════════════════════
+//  GUARDAR LIBRO → SUPABASE
+// ══════════════════════════════
+async function guardarLibro() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    showMsg('err', '⚠️ Primero configura tu URL y Key de Supabase abajo.');
+    return;
+  }
+
+  const titulo = document.getElementById('f-titulo').value.trim();
+  const autor  = document.getElementById('f-autor').value.trim();
+  if (!titulo || !autor) {
+    showMsg('err', 'El título y el autor son obligatorios.');
+    return;
+  }
+
+  const libro = {
+    titulo,
+    autor,
+    precio:      parseFloat(document.getElementById('f-precio').value) || 0,
+    estrellas:   starValue,
+    categoria:   document.getElementById('f-categoria').value,
+    cover:       document.getElementById('f-cover').value.trim(),
+    pdf_url:     document.getElementById('f-pdf').value.trim(),
+    descripcion: document.getElementById('f-desc').value.trim(),
+    bestseller:  document.getElementById('f-bestseller').checked
+  };
+
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/libros`, {
+      method: 'POST',
+      headers: supabaseHeaders(),
+      body: JSON.stringify(libro)
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Error al guardar');
+    }
+
+    showMsg('ok', `✅ "${titulo}" publicado correctamente.`);
+    resetForm();
+    loadBooks();
+  } catch (e) {
+    showMsg('err', '❌ ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'GUARDAR LIBRO';
+  }
+}
+
+// ══════════════════════════════
+//  CARGAR LIBROS
+// ══════════════════════════════
+async function loadBooks() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return;
+  const list = document.getElementById('books-list');
+  list.innerHTML = '<div class="empty-msg">Cargando...</div>';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/libros?select=*&order=created_at.desc`, {
+      headers: supabaseHeaders()
+    });
+    const libros = await res.json();
+
+    if (!Array.isArray(libros) || libros.length === 0) {
+      list.innerHTML = '<div class="empty-msg">No hay libros aún. ¡Agrega el primero!</div>';
+      document.getElementById('books-count').textContent = '';
+      return;
+    }
+
+    document.getElementById('books-count').textContent = `(${libros.length})`;
+    list.innerHTML = libros.map(l => `
+      <div class="book-item">
+        <img src="${l.cover || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=80&q=60'}" alt="${l.titulo}" onerror="this.src='https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=80&q=60'" />
+        <div class="book-item-info">
+          <div class="book-item-title">${l.titulo}</div>
+          <div class="book-item-meta">${l.autor} · ${l.categoria} · €${parseFloat(l.precio||0).toFixed(2)} · ${'★'.repeat(l.estrellas||5)}</div>
+        </div>
+        <button class="btn-delete" onclick="eliminarLibro(${l.id}, '${l.titulo.replace(/'/g,"\\'")}')">Eliminar</button>
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="empty-msg" style="color:var(--red)">Error al cargar: ${e.message}</div>`;
+  }
+}
+
+// ══════════════════════════════
+//  ELIMINAR LIBRO
+// ══════════════════════════════
+async function eliminarLibro(id, titulo) {
+  if (!confirm(`¿Eliminar "${titulo}"?`)) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/libros?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: supabaseHeaders()
+    });
+    loadBooks();
+  } catch (e) {
+    alert('Error al eliminar: ' + e.message);
+  }
+}
+
+// ══════════════════════════════
+//  UTILS
+// ══════════════════════════════
+function showMsg(type, text) {
+  const el = document.getElementById('form-msg');
+  el.className = type;
+  el.textContent = text;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+function resetForm() {
+  ['f-titulo','f-autor','f-cover','f-pdf','f-desc','f-precio'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-gratis').checked = false;
+  document.getElementById('f-bestseller').checked = false;
+  document.getElementById('f-precio').disabled = false;
+  setStar(5);
+}
+</script>
+</body>
+</html>
