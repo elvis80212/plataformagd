@@ -460,7 +460,58 @@ addSwipeToClose('carrito-modal', cerrarCarrito);
 addSwipeToClose('libro-modal',   cerrarLibro);
 addSwipeToClose('filter-sheet',  cerrarFiltros);
 
+// ===== SUPABASE CONFIG =====
+const SB_URL = localStorage.getItem('sb_url') || '';
+const SB_KEY = localStorage.getItem('sb_key') || '';
+
+async function cargarLibrosDesdeSupabase() {
+  if (!SB_URL || !SB_KEY) {
+    // Sin Supabase configurado, usar libros locales
+    renderBooks(libros);
+    updatePriceRange();
+    updateMobilePriceRange();
+    return;
+  }
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/libros?select=*&order=created_at.desc`, {
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY
+      }
+    });
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      // Normalizar campos de Supabase al formato local
+      const librosDB = data.map(l => ({
+        id: l.id,
+        titulo: l.titulo,
+        autor: l.autor,
+        precio: parseFloat(l.precio) || 0,
+        estrellas: l.estrellas || 5,
+        categoria: l.categoria || 'Filosofía',
+        cover: l.cover || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&q=80',
+        descripcion: l.descripcion || '',
+        bestseller: l.bestseller || false,
+        pdf: l.pdf_url || null
+      }));
+      // Combinar libros locales + Supabase (evitar duplicados por id)
+      const idsDB = new Set(librosDB.map(l => l.id));
+      const localesFiltrados = libros.filter(l => !idsDB.has(l.id));
+      const todos = [...librosDB, ...localesFiltrados];
+      renderBooks(todos);
+      updatePriceRange();
+      updateMobilePriceRange();
+    } else {
+      renderBooks(libros);
+      updatePriceRange();
+      updateMobilePriceRange();
+    }
+  } catch(e) {
+    renderBooks(libros);
+    updatePriceRange();
+    updateMobilePriceRange();
+  }
+}
+
 // ===== INIT =====
-renderBooks(libros);
-updatePriceRange();
-updateMobilePriceRange();
+cargarLibrosDesdeSupabase();
