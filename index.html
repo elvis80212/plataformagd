@@ -599,16 +599,16 @@ function getDayLabel(dk){
 function generarDias(){
   diasKeys=[];
   var hoy=new Date();
-  hoy.setDate(hoy.getDate() + offsetSemana*7);
-  for(var i=0;i<SHOW_DAYS;i++){
-    var d=new Date(hoy); d.setDate(hoy.getDate()+i);
-    diasKeys.push(getFechaStr(d));
+  var año=hoy.getFullYear(), mes=hoy.getMonth()+offsetSemana;
+  año += Math.floor(mes/12); mes = ((mes%12)+12)%12;
+  var totalDias=new Date(año,mes+1,0).getDate();
+  for(var i=1;i<=totalDias;i++){
+    diasKeys.push(getFechaStr(new Date(año,mes,i)));
   }
   var lbl = document.getElementById('semana-label');
   if(lbl){
-    var p1=diasKeys[0].split('-'), p2=diasKeys[6].split('-');
-    var meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    lbl.textContent = p1[2]+' '+meses[+p1[1]-1]+' – '+p2[2]+' '+meses[+p2[1]-1]+' '+p2[0];
+    var meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    lbl.textContent = meses[mes]+' '+año;
   }
 }
 
